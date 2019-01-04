@@ -33,7 +33,7 @@ use pocketmine\item\Item;
 use pocketmine\network\mcpe\handler\SessionHandler;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 
-class CraftingDataPacket extends DataPacket{
+class CraftingDataPacket extends BasePacket implements ClientboundPacket{
 	public const NETWORK_ID = ProtocolInfo::CRAFTING_DATA_PACKET;
 
 	public const ENTRY_SHAPELESS = 0;

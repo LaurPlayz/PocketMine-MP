@@ -33,7 +33,7 @@ use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\network\mcpe\protocol\types\MapTrackedObject;
 use pocketmine\utils\Color;
 
-class ClientboundMapItemDataPacket extends DataPacket{
+class ClientboundMapItemDataPacket extends BasePacket implements ClientboundPacket{
 	public const NETWORK_ID = ProtocolInfo::CLIENTBOUND_MAP_ITEM_DATA_PACKET;
 
 	public const BITFLAG_TEXTURE_UPDATE = 0x02;

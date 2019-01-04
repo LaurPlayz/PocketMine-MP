@@ -31,7 +31,7 @@ use pocketmine\network\mcpe\handler\SessionHandler;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\resourcepacks\ResourcePack;
 
-class ResourcePackStackPacket extends DataPacket{
+class ResourcePackStackPacket extends BasePacket implements ClientboundPacket{
 	public const NETWORK_ID = ProtocolInfo::RESOURCE_PACK_STACK_PACKET;
 
 	/** @var bool */

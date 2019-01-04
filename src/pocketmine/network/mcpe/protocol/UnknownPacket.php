@@ -28,7 +28,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\network\mcpe\handler\SessionHandler;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 
-class UnknownPacket extends DataPacket{
+class UnknownPacket extends BasePacket{
 	public const NETWORK_ID = -1; //Invalid, do not try to write this
 
 	/** @var string */

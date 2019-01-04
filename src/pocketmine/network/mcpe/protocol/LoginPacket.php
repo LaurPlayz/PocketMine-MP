@@ -32,7 +32,7 @@ use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\utils\BinaryStream;
 use pocketmine\utils\Utils;
 
-class LoginPacket extends DataPacket{
+class LoginPacket extends BasePacket implements ServerboundPacket{
 	public const NETWORK_ID = ProtocolInfo::LOGIN_PACKET;
 
 	public const EDITION_POCKET = 0;

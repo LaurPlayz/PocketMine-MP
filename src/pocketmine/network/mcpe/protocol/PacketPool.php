@@ -26,7 +26,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 
 class PacketPool{
-	/** @var \SplFixedArray<DataPacket> */
+	/** @var \SplFixedArray<Packet> */
 	protected static $pool = null;
 
 	public static function init() : void{
@@ -156,27 +156,27 @@ class PacketPool{
 	}
 
 	/**
-	 * @param DataPacket $packet
+	 * @param Packet $packet
 	 */
-	public static function registerPacket(DataPacket $packet) : void{
+	public static function registerPacket(Packet $packet) : void{
 		static::$pool[$packet->pid()] = clone $packet;
 	}
 
 	/**
 	 * @param int $pid
 	 *
-	 * @return DataPacket
+	 * @return Packet
 	 */
-	public static function getPacketById(int $pid) : DataPacket{
+	public static function getPacketById(int $pid) : Packet{
 		return isset(static::$pool[$pid]) ? clone static::$pool[$pid] : new UnknownPacket();
 	}
 
 	/**
 	 * @param NetworkBinaryStream $buffer
 	 *
-	 * @return DataPacket
+	 * @return Packet
 	 */
-	public static function getPacket(NetworkBinaryStream $buffer) : DataPacket{
+	public static function getPacket(NetworkBinaryStream $buffer) : Packet{
 		$offset = $buffer->getOffset();
 		$pk = static::getPacketById($buffer->getUnsignedVarInt());
 		$buffer->offset = $offset;
