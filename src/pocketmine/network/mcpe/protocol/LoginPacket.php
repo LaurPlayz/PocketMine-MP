@@ -28,6 +28,7 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\entity\Skin;
 use pocketmine\network\mcpe\handler\SessionHandler;
+use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\utils\BinaryStream;
 use pocketmine\utils\Utils;
 
@@ -78,12 +79,12 @@ class LoginPacket extends DataPacket{
 		return $this->protocol !== null and $this->protocol !== ProtocolInfo::CURRENT_PROTOCOL;
 	}
 
-	protected function decodePayload() : void{
-		$this->protocol = $this->getInt();
+	protected function decodePayload(NetworkBinaryStream $in) : void{
+		$this->protocol = $in->getInt();
 
 		try{
-			$this->decodeConnectionRequest();
-		}catch(\Throwable $e){
+			$this->decodeConnectionRequest($in);
+		}catch(\Throwable $e){ //TODO: clean up this clusterfuck
 			if($this->protocol === ProtocolInfo::CURRENT_PROTOCOL){
 				throw $e;
 			}
@@ -96,8 +97,14 @@ class LoginPacket extends DataPacket{
 		}
 	}
 
-	protected function decodeConnectionRequest() : void{
-		$buffer = new BinaryStream($this->getString());
+	/**
+	 * @param NetworkBinaryStream $in
+	 *
+	 * @throws \OutOfBoundsException
+	 * @throws \RuntimeException
+	 */
+	protected function decodeConnectionRequest(NetworkBinaryStream $in) : void{
+		$buffer = new BinaryStream($in->getString());
 
 		$this->chainData = json_decode($buffer->get($buffer->getLInt()), true);
 
@@ -142,7 +149,7 @@ class LoginPacket extends DataPacket{
 		);
 	}
 
-	protected function encodePayload() : void{
+	protected function encodePayload(NetworkBinaryStream $out) : void{
 		//TODO
 	}
 

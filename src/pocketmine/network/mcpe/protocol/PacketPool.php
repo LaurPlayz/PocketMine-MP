@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
-use pocketmine\utils\Binary;
+use pocketmine\network\mcpe\NetworkBinaryStream;
 
 class PacketPool{
 	/** @var \SplFixedArray<DataPacket> */
@@ -172,15 +172,14 @@ class PacketPool{
 	}
 
 	/**
-	 * @param string $buffer
+	 * @param NetworkBinaryStream $buffer
 	 *
 	 * @return DataPacket
 	 */
-	public static function getPacket(string $buffer) : DataPacket{
-		$offset = 0;
-		$pk = static::getPacketById(Binary::readUnsignedVarInt($buffer, $offset));
-		$pk->setBuffer($buffer, $offset);
-
+	public static function getPacket(NetworkBinaryStream $buffer) : DataPacket{
+		$offset = $buffer->getOffset();
+		$pk = static::getPacketById($buffer->getUnsignedVarInt());
+		$buffer->offset = $offset;
 		return $pk;
 	}
 }

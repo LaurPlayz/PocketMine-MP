@@ -68,7 +68,7 @@ class NetworkSession{
 	/** @var NetworkCipher */
 	private $cipher;
 
-	/** @var PacketStream|null */
+	/** @var NetworkBinaryStream|null */
 	private $sendBuffer;
 
 	/** @var \SplQueue|CompressBatchPromise[] */
@@ -177,8 +177,9 @@ class NetworkSession{
 		}
 
 		Timings::$playerNetworkReceiveDecompressTimer->startTiming();
+		$batch = new NetworkBinaryStream();
 		try{
-			$stream = new PacketStream(NetworkCompression::decompress($payload));
+			$batch->setBuffer(NetworkCompression::decompress($payload));
 		}catch(\ErrorException $e){
 			$this->server->getLogger()->debug("Failed to decompress packet from " . $this->ip . " " . $this->port . ": " . bin2hex($payload));
 			$this->disconnect("Compressed packet batch decode error (incompatible game version?)", false);
@@ -187,25 +188,29 @@ class NetworkSession{
 			Timings::$playerNetworkReceiveDecompressTimer->stopTiming();
 		}
 
-		while(!$stream->feof() and $this->connected){
-			$this->handleDataPacket(PacketPool::getPacket($stream->getString()));
+		$buffer = new NetworkBinaryStream();
+		while(!$batch->feof() and $this->connected){
+			$buffer->setBuffer($batch->getString(), 0);
+			$this->handleDataPacket($buffer);
 		}
 	}
 
-	public function handleDataPacket(DataPacket $packet) : void{
+	public function handleDataPacket(NetworkBinaryStream $buffer) : void{
+		$packet = PacketPool::getPacket($buffer);
+
 		$timings = Timings::getReceiveDataPacketTimings($packet);
 		$timings->startTiming();
 
-		$packet->decode();
-		if(!$packet->feof() and !$packet->mayHaveUnreadBytes()){
-			$remains = substr($packet->getBuffer(), $packet->getOffset());
+		$packet->decode($buffer);
+		if(!$buffer->feof() and !$packet->mayHaveUnreadBytes()){
+			$remains = substr($buffer->getBuffer(), $buffer->getOffset());
 			$this->server->getLogger()->debug("Still " . strlen($remains) . " bytes unread in " . $packet->getName() . ": 0x" . bin2hex($remains));
 		}
 
 		$ev = new DataPacketReceiveEvent($this->player, $packet);
 		$ev->call();
 		if(!$ev->isCancelled() and !$packet->handle($this->handler)){
-			$this->server->getLogger()->debug("Unhandled " . $packet->getName() . " received from " . $this->player->getName() . ": 0x" . bin2hex($packet->getBuffer()));
+			$this->server->getLogger()->debug("Unhandled " . $packet->getName() . " received from " . $this->player->getName() . ": 0x" . bin2hex($buffer->getBuffer()));
 		}
 
 		$timings->stopTiming();
@@ -221,7 +226,10 @@ class NetworkSession{
 				return false;
 			}
 
-			$this->addToSendBuffer($packet);
+			$writer = new NetworkBinaryStream();
+			$packet->encode($writer);
+			$this->addToSendBuffer($writer->getBuffer());
+
 			if($immediate){
 				$this->flushSendBuffer(true);
 			}
@@ -234,25 +242,20 @@ class NetworkSession{
 
 	/**
 	 * @internal
-	 * @param DataPacket $packet
+	 *
+	 * @param string $buffer
 	 */
-	public function addToSendBuffer(DataPacket $packet) : void{
-		$timings = Timings::getSendDataPacketTimings($packet);
-		$timings->startTiming();
-		try{
-			if($this->sendBuffer === null){
-				$this->sendBuffer = new PacketStream();
-			}
-			$this->sendBuffer->putPacket($packet);
-			$this->server->getNetwork()->scheduleSessionTick($this);
-		}finally{
-			$timings->stopTiming();
+	public function addToSendBuffer(string $buffer) : void{
+		if($this->sendBuffer === null){
+			$this->sendBuffer = new NetworkBinaryStream();
 		}
+		$this->sendBuffer->putString($buffer);
+		$this->server->getNetwork()->scheduleSessionTick($this);
 	}
 
 	private function flushSendBuffer(bool $immediate = false) : void{
 		if($this->sendBuffer !== null){
-			$promise = $this->server->prepareBatch($this->sendBuffer, $immediate);
+			$promise = $this->server->prepareBatch($this->sendBuffer->getBuffer(), $immediate);
 			$this->sendBuffer = null;
 			$this->queueCompressed($promise, $immediate);
 		}
