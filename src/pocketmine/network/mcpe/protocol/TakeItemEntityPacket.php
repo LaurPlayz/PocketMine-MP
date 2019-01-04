@@ -38,7 +38,8 @@ class TakeItemEntityPacket extends BasePacket implements ClientboundPacket{
 	public $eid;
 
 	protected function decodePayload(NetworkBinaryStream $in) : void{
-
+		$this->target = $in->getEntityRuntimeId();
+		$this->eid = $in->getEntityRuntimeId();
 	}
 
 	protected function encodePayload(NetworkBinaryStream $out) : void{
