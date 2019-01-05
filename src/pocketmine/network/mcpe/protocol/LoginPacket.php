@@ -31,6 +31,9 @@ use pocketmine\network\mcpe\handler\SessionHandler;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\utils\BinaryStream;
 use pocketmine\utils\Utils;
+use function base64_decode;
+use function get_class;
+use function json_decode;
 
 class LoginPacket extends BasePacket implements ServerboundPacket{
 	public const NETWORK_ID = ProtocolInfo::LOGIN_PACKET;

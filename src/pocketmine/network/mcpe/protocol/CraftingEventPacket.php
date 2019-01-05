@@ -29,6 +29,7 @@ use pocketmine\item\Item;
 use pocketmine\network\mcpe\handler\SessionHandler;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\utils\UUID;
+use function count;
 
 class CraftingEventPacket extends BasePacket implements ServerboundPacket{
 	public const NETWORK_ID = ProtocolInfo::CRAFTING_EVENT_PACKET;

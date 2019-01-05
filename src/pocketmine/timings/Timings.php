@@ -29,6 +29,7 @@ use pocketmine\network\mcpe\protocol\ServerboundPacket;
 use pocketmine\Player;
 use pocketmine\scheduler\TaskHandler;
 use pocketmine\tile\Tile;
+use function dechex;
 
 abstract class Timings{
 

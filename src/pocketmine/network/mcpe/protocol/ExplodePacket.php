@@ -29,6 +29,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\handler\SessionHandler;
 use pocketmine\network\mcpe\NetworkBinaryStream;
+use function count;
 
 class ExplodePacket extends BasePacket implements ClientboundPacket{
 	public const NETWORK_ID = ProtocolInfo::EXPLODE_PACKET;
